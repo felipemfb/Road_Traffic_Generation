@@ -120,7 +120,7 @@ pip install matplotlib seaborn
 ```bash
 # Cloner le repository
 git clone https://github.com/felipemfb/Road_Traffic_Generation.git
-cd nyc-traffic-prediction
+cd Road_Traffic_Generation
 
 # Créer un environnement virtuel
 python -m venv venv
@@ -387,3 +387,4 @@ Ce projet est sous licence MIT. Voir le fichier [LICENSE](LICENSE) pour plus de 
 
 
 Pour les données originales : bpdonov2@illinois.edu
+
