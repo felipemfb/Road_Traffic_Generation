@@ -1,8 +1,9 @@
 ﻿# 🚦 NYC Traffic Prediction - Graph Neural Network
 
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![PyTorch](https://img.shields.io/badge/PyTorch-2.0+-red.svg)](https://pytorch.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Status: In Development](https://img.shields.io/badge/Status-In%20Development-orange.svg)]()
+[![Status: Phase 3](https://img.shields.io/badge/Status-Phase%203%20Complete-green.svg)]()
 
 Prédiction de trafic urbain par **Graph Neural Network (GNN)** avec capacité de **Transfer Learning** vers d'autres villes.
 
@@ -16,6 +17,7 @@ Prédiction de trafic urbain par **Graph Neural Network (GNN)** avec capacité d
 - [Phases du Projet](#-phases-du-projet)
 - [Structure des Fichiers](#-structure-des-fichiers)
 - [Features Générées](#-features-générées)
+- [Modèles GNN](#-modèles-gnn)
 - [Résultats](#-résultats)
 - [Roadmap](#-roadmap)
 - [Références](#-références)
@@ -50,12 +52,12 @@ Le modèle est entraîné sur **New York (2010-2013)** avec des features **norma
 ║    │   Phase 1    │───▶│   Phase 2    │───▶│   Phase 3    │───▶│   Phase 4   │ ║
 ║    │   Feature    │    │    Line      │    │     GNN      │    │ Validation  │ ║
 ║    │ Engineering  │    │    Graph     │    │    Model     │    │ & Transfer  │ ║
-║    │     [✓]      │    │     [✓]      │    │     [ ]      │    │    [ ]      │ ║
+║    │     [✓]      │    │     [✓]      │    │     [✓]      │    │    [ ]      │ ║
 ║    └──────────────┘    └──────────────┘    └──────────────┘    └─────────────┘ ║
 ║                                                                                 ║
 ║    nodes.csv ─────────▶ nodes_enriched.csv ─────────▶ edge_index.npy           ║
 ║    links.csv ─────────▶ links_enriched.csv ─────────▶ node_features.npy        ║
-║    travel_times.csv ──▶ travel_enriched.csv ────────▶ mean_travel_times.npy    ║
+║    travel_times.csv ──▶ travel_enriched.csv ────────▶ model_best.pt            ║
 ║                                                                                 ║
 ╚════════════════════════════════════════════════════════════════════════════════╝
 ```
@@ -101,6 +103,7 @@ travel_times_2013.csv:
 - Python 3.8+
 - **8 GB RAM minimum** (optimisé pour traitement streaming)
 - ~30 GB espace disque (données + enrichies)
+- GPU recommandé pour Phase 3 (optionnel)
 
 ### Dépendances
 
@@ -108,8 +111,8 @@ travel_times_2013.csv:
 # Dépendances de base (Phases 1-2)
 pip install pandas numpy scipy
 
-# Dépendances GNN (Phases 3-4)
-pip install torch torch-geometric networkx
+# Dépendances GNN (Phase 3)
+pip install torch torch-geometric
 
 # Optionnel : visualisation
 pip install matplotlib seaborn
@@ -119,8 +122,8 @@ pip install matplotlib seaborn
 
 ```bash
 # Cloner le repository
-git clone https://github.com/felipemfb/Road_Traffic_Generation.git
-cd Road_Traffic_Generation
+git clone https://github.com/votre-username/nyc-traffic-prediction.git
+cd nyc-traffic-prediction
 
 # Créer un environnement virtuel
 python -m venv venv
@@ -172,7 +175,41 @@ python build_line_graph.py \
 - `observation_counts.npy` : Nombre d'observations par lien
 - `line_graph_metadata.json` : Métadonnées et validation
 
-### Phase 3-4 : À venir
+### Phase 3 : Entraînement GNN
+
+```bash
+# Entraînement avec GraphSAGE (recommandé)
+python train_gnn.py \
+    --data-dir ./line_graph_data \
+    --output-dir ./models
+
+# Utiliser GAT avec configuration personnalisée
+python train_gnn.py \
+    -d ./line_graph_data \
+    -o ./models \
+    --model gat \
+    --hidden 128 \
+    --epochs 300 \
+    --patience 30
+
+# Split aléatoire au lieu de spatial
+python train_gnn.py \
+    -d ./line_graph_data \
+    -o ./models \
+    --no-spatial-split
+
+# Avec Mixed Precision (GPU)
+python train_gnn.py \
+    -d ./line_graph_data \
+    -o ./models \
+    --amp
+```
+
+**Sortie :**
+- `model_best.pt` : Meilleur modèle (selon validation loss)
+- `config.json` : Configuration pour l'inférence
+- `training_history.json` : Courbes d'apprentissage
+- `final_results.json` : Métriques finales
 
 ---
 
@@ -201,15 +238,22 @@ nyc-traffic-prediction/
 │       ├── observation_counts.npy
 │       └── line_graph_metadata.json
 │
+├── models/                       # Sortie Phase 3
+│   ├── model_best.pt
+│   ├── config.json
+│   ├── training_history.json
+│   └── final_results.json
+│
 ├── scripts/
 │   ├── enrich_graph.py           # Phase 1
 │   ├── build_line_graph.py       # Phase 2
-│   ├── train_gnn.py              # Phase 3 (à venir)
+│   ├── train_gnn.py              # Phase 3
 │   └── evaluate.py               # Phase 4 (à venir)
 │
 ├── docs/
 │   ├── Phase_1.pdf               # Rapport technique Phase 1
-│   └── Phase_2.pdf               # Rapport technique Phase 2
+│   ├── Phase_2.pdf               # Rapport technique Phase 2
+│   └── Phase_3.pdf               # Rapport technique Phase 3
 │
 ├── README.md
 └── requirements.txt
@@ -289,6 +333,80 @@ Chaque nœud du line graph (= segment routier) possède un vecteur de **14 featu
 
 ---
 
+## 🧠 Modèles GNN
+
+### Architectures Disponibles (Phase 3)
+
+| Modèle | Description | Transfer Learning |
+|--------|-------------|-------------------|
+| **GraphSAGE** | Agrégation inductive par échantillonnage | ✅ Recommandé |
+| **GAT** | Graph Attention Network avec multi-têtes | ✅ Bon |
+| **GCN** | Graph Convolutional Network (baseline) | ⚠️ Limité |
+
+### GraphSAGE (Recommandé)
+
+GraphSAGE apprend à **agréger les features des voisins** de manière inductive, ce qui le rend idéal pour le transfer learning :
+
+```
+Input (14 features)
+    │
+    ▼
+┌─────────────────────┐
+│ SAGEConv + BN + ReLU│ ← Couche 1
+└─────────────────────┘
+    │ (64 dim)
+    ▼
+┌─────────────────────┐
+│ SAGEConv + BN + ReLU│ ← Couche 2
+└─────────────────────┘
+    │ (64 dim)
+    ▼
+┌─────────────────────┐
+│ SAGEConv + BN + ReLU│ ← Couche 3
+└─────────────────────┘
+    │ (64 dim)
+    ▼
+┌─────────────────────┐
+│   MLP (64→32→1)     │ ← Readout
+└─────────────────────┘
+    │
+    ▼
+Output (travel_time)
+```
+
+### Configuration par Défaut
+
+| Paramètre | Valeur | Description |
+|-----------|--------|-------------|
+| `hidden_channels` | 64 | Dimension des couches cachées |
+| `num_layers` | 3 | Nombre de couches GNN |
+| `dropout` | 0.3 | Taux de dropout |
+| `heads` | 4 | Têtes d'attention (GAT uniquement) |
+| `learning_rate` | 0.001 | Taux d'apprentissage |
+| `epochs` | 200 | Maximum d'epochs |
+| `patience` | 20 | Early stopping |
+
+### Split Spatial
+
+Le split spatial simule le scénario de transfer learning :
+
+```
+        OUEST                              EST
+┌─────────────────┬─────────┬─────────────────┐
+│                 │         │                 │
+│   TRAIN (70%)   │VAL (15%)│   TEST (15%)    │
+│   Manhattan     │         │    Queens       │
+│   Brooklyn      │         │                 │
+│                 │         │                 │
+└─────────────────┴─────────┴─────────────────┘
+```
+
+- **Train** : Zones ouest (Manhattan, Brooklyn)
+- **Validation** : Zone intermédiaire
+- **Test** : Zone est (Queens) - simule une nouvelle ville
+
+---
+
 ## 📊 Résultats
 
 ### Phase 1 - Feature Engineering
@@ -316,7 +434,18 @@ Chaque nœud du line graph (= segment routier) possède un vecteur de **14 featu
 | Mémoire edge_index | 6.4 MB |
 | Mémoire node_features | 14.6 MB |
 
-### Chargement PyTorch Geometric
+### Phase 3 - Modèle GNN
+
+| Métrique | Valeur |
+|----------|--------|
+| Architecture | GraphSAGE |
+| Paramètres entraînables | ~20,865 |
+| Train samples | ~40,787 |
+| Val samples | ~8,740 |
+| Test samples | ~8,740 |
+| Couverture labels | 22.3% |
+
+### Chargement et Inférence
 
 ```python
 import torch
@@ -334,6 +463,23 @@ data = Data(x=x, edge_index=edge_index, y=y)
 print(f"Nœuds: {data.num_nodes}")        # 260,855
 print(f"Arêtes: {data.num_edges}")       # 805,415
 print(f"Features: {data.num_node_features}")  # 14
+
+# Charger le modèle entraîné
+checkpoint = torch.load('models/model_best.pt')
+config = checkpoint['config']
+y_mean = checkpoint['y_mean']
+y_std = checkpoint['y_std']
+
+# Créer et charger le modèle
+from train_gnn import create_model
+model = create_model(config, in_channels=14)
+model.load_state_dict(checkpoint['model_state_dict'])
+model.eval()
+
+# Inférence
+with torch.no_grad():
+    predictions_normalized = model(data.x, data.edge_index)
+    predictions = predictions_normalized * y_std + y_mean  # Dénormaliser
 ```
 
 ---
@@ -342,7 +488,7 @@ print(f"Features: {data.num_node_features}")  # 14
 
 - [x] **v0.1** - Phase 1 : Feature Engineering
 - [x] **v0.2** - Phase 2 : Line Graph Construction
-- [ ] **v0.3** - Phase 3 : GNN Model (GraphSAGE/GAT)
+- [x] **v0.3** - Phase 3 : GNN Model (GraphSAGE/GAT/GCN)
 - [ ] **v0.4** - Phase 4 : Validation NYC (split spatial)
 - [ ] **v1.0** - Transfer Learning vers Marseille
 
@@ -358,6 +504,8 @@ print(f"Features: {data.num_node_features}")  # 14
 
 3. Veličković, P., et al. (2018). *Graph Attention Networks*. ICLR.
 
+4. Kipf, T. N., & Welling, M. (2017). *Semi-Supervised Classification with Graph Convolutional Networks*. ICLR.
+
 ### Datasets
 
 - [NYC Taxi Data](https://uofi.box.com/NYCtaxidata)
@@ -365,6 +513,7 @@ print(f"Features: {data.num_node_features}")  # 14
 
 ### Outils
 
+- [PyTorch](https://pytorch.org/)
 - [PyTorch Geometric](https://pytorch-geometric.readthedocs.io/)
 - [NetworkX](https://networkx.org/)
 - [taxisim](https://github.com/Lab-Work/taxisim)
@@ -385,6 +534,4 @@ Ce projet est sous licence MIT. Voir le fichier [LICENSE](LICENSE) pour plus de 
 
 ## 📧 Contact
 
-
 Pour les données originales : bpdonov2@illinois.edu
-
