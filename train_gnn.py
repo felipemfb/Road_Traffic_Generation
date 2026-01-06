@@ -21,10 +21,6 @@ Optimisé pour environnements à mémoire limitée (8GB RAM):
 - Gradient accumulation optionnelle
 - Mixed precision (AMP) optionnelle
 
-Auteur: Claude (Anthropic)
-Date: 06 Janvier 2026
-Version: 1.0.0
-
 Usage:
     python train_gnn.py --data-dir ./line_graph_data --output-dir ./models
     python train_gnn.py -d ./data -o ./models --model gat --epochs 100
