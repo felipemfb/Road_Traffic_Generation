@@ -17,10 +17,6 @@ Optimisé pour environnements à mémoire limitée (8GB RAM):
 - Matrices sparse pour l'adjacence
 - Types de données optimisés (float32, int32)
 
-Auteur: Claude (Anthropic)
-Date: 05 Janvier 2026
-Version: 1.0.0
-
 Usage:
     python build_line_graph.py --data-dir ./enriched_data --output-dir ./line_graph_data
 

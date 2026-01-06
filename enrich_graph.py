@@ -12,10 +12,6 @@ Optimisé pour traiter des fichiers volumineux (5GB+) via:
 - Types de données optimisés (catégories, float32)
 - Calculs vectorisés (numpy)
 
-Auteur: Claude (Anthropic)
-Date: 05 Janvier 2026
-Version: 1.0.0
-
 Usage:
     python enrich_graph.py --data-dir ./travel_times_2013 --output-dir ./enriched_data
 
