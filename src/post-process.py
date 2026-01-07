@@ -22,7 +22,7 @@ ways:
 travel_times:
     day_time:
         à partir de datetime
-    week_day:
+    is_weekend:
         à partir de datetime
 
 ---------- Données à recouper: -----------
@@ -54,4 +54,105 @@ links:
 travel_times:
     link_id, day_time, week_day
 """
+
+import pandas as pd
+import geopandas as gpd
+import re
+
+###########################################################
+# Transformations
+###########################################################
+
+# nodes
+
+def _map_place_to_int(nodesGdf):
+    place_map = {
+        "town": 0,
+        "quarter": 1,
+        "neighbourhood": 2, "cityblock": 2,
+        "plot": 3,
+        "village": 4,
+        "hamlet": 5,
+        "allotments": 6, "dwellings": 6, "farm": 6
+    }
+
+    nodesGdf["place"] = (nodesGdf["place"].str.lower().map(place_map).fillna(-1).astype(int))
+
+    return nodesGdf
+
+def _standardize_dist_to_center(nodesGdf):
+    mu = nodesGdf["dist_to_center"].mean()
+    sigma = nodesGdf["dist_to_center"].std()
+
+    nodesGdf["centrality_z"] = (nodesGdf["dist_to_center"] - mu) / sigma
+
+def _add_num_links(nodesGdf):
+    nodesGdf["num_links"] = nodesGdf["num_in_links"] + nodesGdf["num_out_links"]
+
+    return nodesGdf
+
+# links
+
+def _add_angle(linksDf):
+    linksDf["angle"] =  abs(linksDf["begin_angle"] - linksDf["end_angle"])
+    linksDf["angle"] = min(linksDf["angle"], 360 - linksDf["angle"])
+
+    return linksDf
+
+# ways
+
+# Fait par ia me demandez pas
+def _parse_maxspeed_to_kmh(maxspeed):
+    """
+    Convertit un tag OSM maxspeed en km/h (float).
+    Retourne None si non exploitable.
+    """
+    if maxspeed is None or not isinstance(maxspeed, str):
+        return None
+
+    maxspeed = maxspeed.lower().strip()
+
+    # valeurs non numériques connues
+    if maxspeed in {"signals", "walk", "none", "variable"}:
+        return None
+
+    # prendre la première valeur si "50;70"
+    maxspeed = maxspeed.split(";")[0].strip()
+
+    # extraire le nombre
+    match = re.search(r"(\d+(\.\d+)?)", maxspeed)
+    if not match:
+        return None
+
+    value = float(match.group(1))
+
+    # conversion selon unité
+    if "mph" in maxspeed:
+        return value * 1.60934
+    elif "knot" in maxspeed:
+        return value * 1.852
+    else:
+        # par défaut km/h
+        return value
+    
+
+def _convert_max_speed(waysDf):
+    waysDf["max_speed_kmh"] = waysDf["maxspeed"].apply(_parse_maxspeed_to_kmh)
+
+    return waysDf
+
+
+# travel_times
+def _convert_datetime_type(timesDf):
+    timesDf["datetime"] = pd.to_datetime(timesDf["datetime"])
+    return timesDf
+
+def _add_day_time(timesDf):
+    timesDf["hour"] = timesDf["datetime"].dt.hour
+    return timesDf
+
+
+def _add_week_day(timesDf):
+    timesDf["is_weekend"] = timesDf["datetime"].dt.weekday >= 5
+    return timesDf
 
