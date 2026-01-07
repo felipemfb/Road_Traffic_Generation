@@ -15,46 +15,35 @@ def get_geodata(city: str, country: str):
 
     return gdf_landuse, gdf_place
 
-def get_ways(city_name, max_attempts=10, delay=2):
-    api = overpy.Overpass()
-
-    query = f"""
-    [out:json][timeout:180];
-    area["name"="{city_name}"]["boundary"="administrative"]->.searchArea;
-    way["highway"](area.searchArea);
-    out tags;
+def get_ways(city):
     """
-    retries = 0
-    while retries <= max_attempts:
-        try:
-            result = api.query(query)
-            ways_data = []
-            for way in result.ways:
-                lanes = way.tags.get("lanes")
-                if lanes is None:
-                    lanes = way.tags.get("lanes:forward")
-                if lanes is not None:
-                    # prendre juste le premier nombre si plusieurs séparés par ";"
-                    lanes = str(lanes).split(";")[0]
-                    try:
-                        lanes = int(lanes)
-                    except ValueError:
-                        lanes = None
+    Récupère toutes les ways routières pour une ville avec osmnx,
+    et retourne un DataFrame avec seulement: osm_way_id, maxspeed, lanes.
+    """
+    # Récupérer le graphe routier "drivable"
+    G = ox.graph_from_place(city, network_type="drive", simplify=True)
+    
+    # Convertir les arêtes du graphe en GeoDataFrame
+    edges = ox.graph_to_gdfs(G, nodes=False)
+    
+    # Garder seulement les colonnes nécessaires
+    waysDf = edges.reset_index()[["osmid", "maxspeed", "lanes"]]
+    
+    # Renommer la colonne osmid pour correspondre à ton pipeline
+    waysDf = waysDf.rename(columns={"osmid": "osm_way_id"})
 
-                ways_data.append({
-                    "osm_way_id": int(way.id),
-                    "maxspeed": way.tags.get("maxspeed"),
-                    "lanes": lanes
-                })
+    waysDf = waysDf.explode("osm_way_id")
+    waysDf["osm_way_id"] = waysDf["osm_way_id"].astype(int)
 
-            return pd.DataFrame(ways_data)
-        except (overpy.exception.OverpassGatewayTimeout,
-            overpy.exception.OverpassTooManyRequests,
-            overpy.exception.OverpassBadRequest) as e:
-            retries += 1
-            wait_time = delay * retries
-            print(f"[WARN] Overpass API error: {e}. Retry {retries}/{max_attempts} after {wait_time}s...")
-            time.sleep(wait_time)
-    print("Failed to fetch ways from overpy, max_attempts passed")
-    return []
-            
+    waysDf['lanes'] = waysDf['lanes'].apply(lambda x: x[0] if isinstance(x, list) else x)
+    waysDf['lanes'] = waysDf['lanes'].astype(str).str.split(';').str[0].astype(float).fillna(1).astype(int)
+
+    waysDf['maxspeed'] = waysDf['maxspeed'].apply(lambda x: x[0] if isinstance(x, list) else x)
+    waysDf['maxspeed'] = waysDf['maxspeed'].astype(str).str.split(';').str[0]
+
+    waysDf = waysDf.groupby('osm_way_id').agg({
+        'maxspeed': 'first',
+        'lanes': 'first'
+    }).reset_index()
+
+    return waysDf

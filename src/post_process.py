@@ -56,7 +56,6 @@ training:
 """
 
 import pandas as pd
-import geopandas as gpd
 import re
 
 ###########################################################
@@ -223,7 +222,7 @@ def _infer_landuse_and_place_dest(linksDf, nodesGdf, waysDf):
         .fillna(-1)
     )
 
-    waysDf = waysDf.drop(columns=["landuse_inf", "place_inf"])
+    waysDf = waysDf.drop(["landuse_inf", "place_inf"], axis=1)
 
     return waysDf
 
@@ -249,16 +248,15 @@ def _join_links(linksDf, nodesGdf, waysDf):
         nodes_lookup[["num_links"]],
         left_on="end_node_id",
         right_index=True,
-        how="left",
-        suffixes=("", "_end")
+        how="left"
     )
-    linksDf["num_out_links"] = linksDf["num_links_end"]
-    linksDf = linksDf.drop(columns=["num_links_end"])
+    linksDf["num_out_links"] = linksDf["num_links"]
+    linksDf = linksDf.drop(columns=["num_links"], axis=1)
 
     # join avec ways
     linksDf = linksDf.merge(
-        waysDf[["osm_way_id", "landuse_dest", "place_dest", "max_speed_kmh", "num_lanes"]],
-        left_on="way_id",
+        waysDf[["osm_way_id", "landuse_dest", "place_dest", "max_speed_kmh", "lanes"]],
+        left_on="osm_way_id",
         right_on="osm_way_id",
         how="left"
     )
@@ -317,23 +315,9 @@ def _complete_times_from_links(linksDf, timesDf):
 ###########################################################
 
 def _cleanup_links_fields(linksDf):
-    linksDf = linksDf.drop(['begin_node_id', 'end_node_id', 'begin_angle', 'end_angle'])
+    linksDf = linksDf.drop(['begin_node_id', 'end_node_id', 'begin_angle', 'end_angle'], axis=1)
 
     return linksDf
-
-
-def _create_training_table(linksDf, timesDf):
-    timesDf = timesDf[['link_id', 'day_time', 'is_weekend', 'travel_time']]
-    
-    # Merge
-    links_with_times = linksDf.merge(
-        timesDf,
-        on='link_id',
-        how='inner'  # on ne garde que les links avec travel_times disponibles
-    )
-    
-    links_with_times = links_with_times.drop(["link_id"], axis=1)
-    return links_with_times
 
 
 ###########################################################
@@ -353,6 +337,14 @@ def post_process_ways(linksDf, nodesGdf, waysDf):
 
     return waysDf
 
+def post_process_times(linksDf, timesDf):
+    timesDf = _convert_datetime_type(timesDf)
+    timesDf = _add_day_time(timesDf)
+    timesDf = _add_week_day(timesDf)
+    timesDf = _complete_times_from_links(linksDf, timesDf)
+    
+    return timesDf
+
 def post_process_links(linksDf, nodesGdf, waysDf):
     linksDf = _join_links(linksDf, nodesGdf, waysDf)
     linksDf = _complete_max_speeds(linksDf)
@@ -361,23 +353,25 @@ def post_process_links(linksDf, nodesGdf, waysDf):
 
     return linksDf
 
-def post_process_times(linksDf, timesDf):
-    timesDf = _convert_datetime_type(timesDf)
-    timesDf = _add_day_time(timesDf)
-    timesDf = _add_week_day(timesDf)
-    timesDf = _complete_times_from_links(linksDf, timesDf)
 
-    return timesDf
 
 def create_training_table(linksDf, timesDf):
-    timesDf = timesDf[['link_id', 'day_time', 'is_weekend', 'travel_time']]
+    timesDf = timesDf[['link_id', 'hour', 'is_weekend', 'speed']]
     
+    print(timesDf.shape)
+    timesAgg = timesDf.groupby(['link_id', 'hour', 'is_weekend'], as_index=False).agg(
+        speed=('speed', 'mean')
+    )
+
+    linksDf = linksDf.rename(columns={"osm_class": "road_type"})
+    print(timesAgg.shape)
     # Merge
     links_with_times = linksDf.merge(
-        timesDf,
+        timesAgg,
         on='link_id',
-        how='inner'  # on ne garde que les links avec travel_times disponibles
+        how='inner'  # on ne garde que les links avec travel_times disponibles (mais normalement déjà géré au preprocess)
     )
+    
     
     links_with_times = links_with_times.drop(["link_id"], axis=1)
     return links_with_times

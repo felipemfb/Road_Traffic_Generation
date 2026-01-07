@@ -14,8 +14,6 @@ Features à récupérer:
 -------- ways --------
     max_speed
     lanes
-    landuse_way_dest
-    place_way_dest
 --------- nodes ---------
     landuse
     place
@@ -69,14 +67,6 @@ def enrich_nodes_with_tags(nodesGdf, gdf_landuse, gdf_place, EPSG):
     )
 
     nodesGdf = nodesGdf.drop_duplicates(subset="node_id", keep="first")
-
-    # print(nodesGdf.columns)
-
-    # print(nodesGdf[['node_id', 'landuse', 'place']].head())
-    # print((nodesGdf['place'] == "unknown").sum())
-    # print(nodesGdf['landuse'].unique())
-    # print(nodesGdf['place'].unique())
-    # print(nodesGdf["node_id"].shape)
 
     return nodesGdf
 
