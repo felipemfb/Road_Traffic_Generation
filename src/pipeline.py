@@ -29,7 +29,7 @@ gc.collect()
 print("############## Enriching ##############")
 
 print("getting geodata")
-gdf_landuse, gdf_place = query_api.get_geodata("New York", "USA")
+gdf_landuse, gdf_place = get_geodata("New York", "USA")
 
 print("enriching table nodes")
 
@@ -65,6 +65,10 @@ gc.collect()
 
 print("creating final table")
 trainingDf = create_training_table(linksDf, timesDf)
+gc.collect()
+
+print("encoding categorial features")
+trainingDf = encode_categorial_features(trainingDf)
 gc.collect()
 
 print("writing table to data/processed/training.csv")

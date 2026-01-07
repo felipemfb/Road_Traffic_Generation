@@ -25,9 +25,6 @@ Imputer si absent de ways:
 
 import pandas as pd
 import geopandas as gpd
-import query_api
-
-import matplotlib.pyplot as plt
 
 def convert_to_gdf(nodesDf, EPSG):
     nodesGdf = gpd.GeoDataFrame(
@@ -97,16 +94,3 @@ def enrich_ways_max_speed_and_lanes(waysDf, ways_tagsDf):
     waysDf['lanes'] = waysDf['lanes'].fillna(1).astype(int)
 
     return waysDf
-
-
-# gdf_landuse, gdf_place = query_api.get_geodata("New York", "USA")
-
-# nodesDf = pd.read_csv("data/raw/nodes.csv")
-
-# nodesGdf = enrich_nodes_with_tags(nodesDf, gdf_landuse, gdf_place, 32618)
-
-# nodesGdf = enrich_nodes_with_dist_to_center(nodesGdf)
-
-# print(nodesGdf["dist_to_center"].describe())
-
-# waysDf = pd.read_csv("data/raw/nodes.csv")

@@ -2,9 +2,7 @@
 Service communiquant avec l'api d'osm
 """
 import osmnx as ox
-import overpy 
 import pandas as pd
-import time
 
 def get_geodata(city: str, country: str):
     try:

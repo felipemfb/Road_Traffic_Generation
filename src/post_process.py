@@ -305,7 +305,7 @@ def _complete_times_from_links(linksDf, timesDf):
         how="left"
     )
 
-    timesDf["speed"] = (timesDf["travel_time"] / timesDf["street_length"]) * 3.6
+    timesDf["speed"] = (timesDf["street_length"] / timesDf["travel_time"]) * 3.6
 
     timesDf = timesDf.drop(["travel_time", "street_length", "begin_node_id", "end_node_id"], axis=1)
     return timesDf
@@ -357,14 +357,13 @@ def post_process_links(linksDf, nodesGdf, waysDf):
 
 def create_training_table(linksDf, timesDf):
     timesDf = timesDf[['link_id', 'hour', 'is_weekend', 'speed']]
-    
-    print(timesDf.shape)
+
     timesAgg = timesDf.groupby(['link_id', 'hour', 'is_weekend'], as_index=False).agg(
         speed=('speed', 'mean')
     )
 
     linksDf = linksDf.rename(columns={"osm_class": "road_type"})
-    print(timesAgg.shape)
+
     # Merge
     links_with_times = linksDf.merge(
         timesAgg,
@@ -375,3 +374,12 @@ def create_training_table(linksDf, timesDf):
     
     links_with_times = links_with_times.drop(["link_id"], axis=1)
     return links_with_times
+
+def encode_categorial_features(trainingDf):
+    trainingDf = pd.get_dummies(trainingDf, columns=[
+        'road_type',
+        'landuse',
+        'landuse_way_dest'
+    ])
+
+    return trainingDf
