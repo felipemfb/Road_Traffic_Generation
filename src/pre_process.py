@@ -86,6 +86,8 @@ def cleanup_data(linksDf, nodesDf, timesDf):
     linksDf = linksDf.drop(index=linksDf[invalid_links_mask].index, axis = 1)
 
     # travel_times
+    timesDf = timesDf.drop(["num_trips"], axis=1)
+    
     invalid_times_mask = timesDf["begin_node_id"] == 0
     timesDf = timesDf.drop(index=timesDf[invalid_times_mask].index, axis=1)
 
