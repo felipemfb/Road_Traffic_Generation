@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split, RandomizedSearchCV
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_absolute_error, root_mean_squared_error, r2_score
 
@@ -8,7 +8,7 @@ df = pd.read_csv("data/processed/training.csv")
 
 # On importe seulement un petit échantillon pour l'instant
 # df = df.sample(
-#     n=1_000,
+#     n=200_000,
 #     random_state=42
 # )
 
@@ -26,21 +26,49 @@ X_train, X_test, y_train, y_test = train_test_split(
 )
 
 rf = RandomForestRegressor(
-    n_estimators=200,
-    max_depth=None,
-    max_features="sqrt",
+    random_state=42,
     n_jobs=-1,
-    random_state=42
+    n_estimators=200, 
+    min_samples_leaf=5,
+    max_features=0.5,
+    max_depth=30,
+    bootstrap=False
 )
 
+# # Sélection des hyperparams avec grid-search + cross validation
 
+# param_dist = {
+#     "n_estimators": [200, 300, 500],
+#     "max_depth": [None, 15, 20, 30],
+#     "min_samples_leaf": [1, 5, 10],
+#     "max_features": ["sqrt", 0.5, 0.7],
+#     "bootstrap": [True, False]
+# }
 
-rf.fit(X_train, y_train)
+# search = RandomizedSearchCV(
+#     rf,
+#     param_distributions=param_dist,
+#     n_iter=30,
+#     scoring="r2",
+#     cv=3,
+#     verbose=2,
+#     n_jobs=-1,
+#     random_state=42
+# )
+
+# search.fit(X_train, y_train)
+
+# print("Meilleurs hyperparamètres :", search.best_params_)
+# print("Meilleur score CV R²   :", search.best_score_)
+
+# best_rf = search.best_estimator_
+# y_pred = best_rf.predict(X_test)
 
 # test
 
-y_pred = rf.predict(X_test)
+rf.fit(X_train, y_train)
 
+y_pred = rf.predict(X_test)
 # performance
 mae = mean_absolute_error(y_test, y_pred)
 rmse = root_mean_squared_error(y_test, y_pred)
