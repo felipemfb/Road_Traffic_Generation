@@ -3,6 +3,8 @@ import numpy as np
 from sklearn.model_selection import train_test_split, RandomizedSearchCV
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_absolute_error, root_mean_squared_error, r2_score
+import joblib
+import os
 
 df = pd.read_csv("data/processed/training.csv")
 
@@ -84,3 +86,9 @@ print("vitesse moyenne:", y_pred.mean())
 print("min: ", y_pred.min())
 print("max: ", y_pred.max())
 print("mediane: ", np.median(y_pred))
+
+os.makedirs("models", exist_ok=True)
+
+joblib.dump(rf, "models/random_forest_ny.joblib")
+
+print("Model saved to models/random_forest_ny.joblib")

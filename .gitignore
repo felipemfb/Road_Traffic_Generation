@@ -4,6 +4,10 @@ __pycache__
 
 # project
 data/**
+models/**
+
+# generated maps
+marseille_speed_map.html
 
 # api
 cache
