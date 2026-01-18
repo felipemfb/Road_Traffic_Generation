@@ -1,13 +1,3 @@
-"""
-Phase 6 : Application à Marseille (CORRIGÉ)
-Projet : Prédiction du Trafic Urbain à partir de la Structure de la Carte
-
-CORRECTIONS :
-- Calcul de curvature identique à NYC
-- Utilise exactement les mêmes features que l'entraînement
-- Pas de features manquantes remplacées par 0
-"""
-
 import pandas as pd
 import numpy as np
 import os
@@ -23,10 +13,7 @@ except ImportError:
     print("ERREUR: osmnx non installé.")
     exit(1)
 
-
-# =============================================================================
 # CONFIGURATION
-# =============================================================================
 
 OUTPUT_DIR = "marseille_output"
 os.makedirs(OUTPUT_DIR, exist_ok=True)
@@ -52,10 +39,7 @@ print("=" * 60)
 print("PHASE 6 : APPLICATION À MARSEILLE (CORRIGÉ)")
 print("=" * 60)
 
-
-# =============================================================================
-# 6.1 Charger la liste des features attendues
-# =============================================================================
+# Charger la liste des features attendues
 
 print("\n--- Chargement de la liste des features ---\n")
 
@@ -68,10 +52,7 @@ else:
     print("  ERREUR: feature_list.txt non trouvé!")
     exit(1)
 
-
-# =============================================================================
-# 6.2 Téléchargement du réseau routier
-# =============================================================================
+# Téléchargement du réseau routier
 
 print("\n--- Téléchargement du réseau routier ---\n")
 
@@ -90,9 +71,7 @@ print(f"  Segments : {len(edges)}")
 print(f"  Noeuds : {len(nodes)}")
 
 
-# =============================================================================
-# 6.3 Téléchargement des POI
-# =============================================================================
+# Téléchargement des POI
 
 print("\n--- Téléchargement des POI ---\n")
 
@@ -129,10 +108,7 @@ def load_or_download_marseille_pois():
 
 pois = load_or_download_marseille_pois()
 
-
-# =============================================================================
-# 6.4 Préparation des segments
-# =============================================================================
+# Préparation des segments
 
 print("\n--- Préparation des segments ---\n")
 
@@ -165,16 +141,13 @@ segments['endY'] = edges_df.geometry.apply(lambda g: g.coords[-1][1])
 print(f"  Segments préparés : {len(segments)}")
 
 
-# =============================================================================
-# 6.5 Features géométriques
-# =============================================================================
+# Features géométriques
 
 print("\n--- Features géométriques ---\n")
 
 # log_street_length
 segments['log_street_length'] = np.log1p(segments['street_length'])
 
-# CORRECTION : Calcul de curvature IDENTIQUE à NYC
 # Calculer les angles de début et fin
 dx = segments['endX'] - segments['startX']
 dy = segments['endY'] - segments['startY']
@@ -189,10 +162,7 @@ print(f"  curvature: min={segments['curvature'].min():.2f}, max={segments['curva
 # osm_class_encoded
 segments['osm_class_encoded'] = segments['osm_class'].map(OSM_CLASS_ORDER).fillna(15)
 
-
-# =============================================================================
-# 6.6 Features topologiques
-# =============================================================================
+# Features topologiques
 
 print("\n--- Features topologiques ---\n")
 
@@ -211,9 +181,7 @@ segments['avg_node_degree'] = (segments['begin_node_degree'] + segments['end_nod
 print("  Degrés des noeuds calculés")
 
 
-# =============================================================================
-# 6.7 Features de position
-# =============================================================================
+# Features de position
 
 print("\n--- Features de position ---\n")
 
@@ -232,10 +200,7 @@ segments['dist_to_center'] = np.sqrt(
 max_dist = segments['dist_to_center'].max()
 segments['dist_to_center_norm'] = segments['dist_to_center'] / max_dist
 
-
-# =============================================================================
-# 6.8 Features POI
-# =============================================================================
+# Features POI
 
 print("\n--- Features POI ---\n")
 
@@ -270,19 +235,14 @@ for poi_type, prefix in [('attractors', 'attractor'), ('transport', 'transport')
     print(f"  dist_{prefix}, count_{prefix}s_500m : calculés")
 
 
-# =============================================================================
-# 6.9 Densité locale
-# =============================================================================
+# Densité locale
 
 print("\n--- Densité locale ---\n")
 
 segment_tree = KDTree(segment_coords)
 segments['road_density_500m'] = segment_tree.query_ball_point(segment_coords, r=0.005, return_length=True)
 
-
-# =============================================================================
-# 6.10 Combinaisons temporelles
-# =============================================================================
+# Combinaisons temporelles
 
 print("\n--- Génération des combinaisons temporelles ---\n")
 
@@ -319,10 +279,7 @@ dataset = pd.concat([segments.loc[segments.index.repeat(n_times)].reset_index(dr
 
 print(f"  Dataset final : {len(dataset):,} lignes")
 
-
-# =============================================================================
-# 6.11 Prédiction
-# =============================================================================
+# Prédiction
 
 print("\n--- Chargement du modèle et prédiction ---\n")
 
@@ -335,7 +292,6 @@ missing_features = [f for f in feature_list if f not in dataset.columns]
 
 if missing_features:
     print(f"  WARNING - Features manquantes : {missing_features}")
-    # NE PAS mettre à 0, utiliser la médiane des features disponibles ou NaN
     for f in missing_features:
         dataset[f] = np.nan
 
@@ -353,9 +309,7 @@ dataset['speed_kmh_predicted'] = vitesse_predite
 print(f"  Prédictions terminées : {len(vitesse_predite):,} valeurs")
 
 
-# =============================================================================
-# 6.12 Statistiques
-# =============================================================================
+# Statistiques
 
 print("\n--- Statistiques des prédictions ---\n")
 
@@ -378,10 +332,7 @@ print("\nVitesse moyenne semaine/weekend :")
 print(f"  Semaine : {dataset.loc[dataset['is_weekend']==0, 'speed_kmh_predicted'].mean():.2f} km/h")
 print(f"  Weekend : {dataset.loc[dataset['is_weekend']==1, 'speed_kmh_predicted'].mean():.2f} km/h")
 
-
-# =============================================================================
-# 6.13 Sauvegarde
-# =============================================================================
+# Sauvegarde
 
 print("\n--- Sauvegarde ---\n")
 
