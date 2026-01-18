@@ -87,33 +87,33 @@ Using methods such as **grid search** and ** cross-validation**, a **Random Fore
 
 ### ✅ Best Hyperparameters Found
 
-n_estimators = 200  
+- n_estimators = 200  
 
-min_samples_leaf = 5  
+- min_samples_leaf = 5  
 
-max_features = 0.5  
+- max_features = 0.5  
 
-max_depth = 30  
+- max_depth = 30  
 
-bootstrap = False
+- bootstrap = False
 
 ## 📊 Model Evaluation Metrics
 The following metrics were obtained after training:
 
-Mean Absolute Error (MAE): 7.61 km/h
+- Mean Absolute Error (MAE): 7.61 km/h
 
-Root Mean Squared Error (RMSE): 12.74 km/h
+- Root Mean Squared Error (RMSE): 12.74 km/h
 
-Coefficient of Determination (R²): 0.472
+- Coefficient of Determination (R²): 0.472
 
 ### 🚗 Speed Statistics
-Average speed: 32.82 km/h
+- Average speed: 32.82 km/h
 
-Median speed: 30.96 km/h
+- Median speed: 30.96 km/h
 
-Minimum speed: 4.99 km/h
+- Minimum speed: 4.99 km/h
 
-Maximum speed: 104.74 km/h
+- Maximum speed: 104.74 km/h
 
 These results show that the model performs particularly well around central tendency measures (mean and median), which are the most relevant for urban traffic analysis.
 
@@ -135,9 +135,9 @@ Through feature engineering, the following attributes were recreated:
 - Categorical variables (via one-hot encoding)
 
 ### 🧪 Test Configuration
-`is_weekend` = 0
+- `is_weekend` = 0
 
-`hour` = 12
+- `hour` = 12
 
 With these parameters, the model successfully generated speed predictions for Marseille streets, and the results were saved for visualization.
 
@@ -153,14 +153,14 @@ A Python-based solution was developed to generate an interactive HTML map displa
 To improve visual clarity, the lowest and highest 5% quantiles were removed. This prevents extreme values from distorting the color scale and ensures better differentiation among intermediate speeds
 
 ## 🧰 Libraries Used
-`osmnx` – Geospatial data extraction (New York & Marseille)
-`pandas` – Data import and processing
-`numpy` – Mathematical operations
-`GeoPandas` – Geospatial data manipulation
-`scikit-learn` – Model training, evaluation, and metrics
-`joblib` – Model persistence
-`folium` – Interactive HTML map generation
-`branca` – Color scale and legend creation
+- `osmnx` – Geospatial data extraction (New York & Marseille)
+- `pandas` – Data import and processing
+- `numpy` – Mathematical operations
+- `GeoPandas` – Geospatial data manipulation
+- `scikit-learn` – Model training, evaluation, and metrics
+- `joblib` – Model persistence
+- `folium` – Interactive HTML map generation
+- `branca` – Color scale and legend creation
 
 ## 🚀 Future Improvements
 Potential next steps for this project include:
