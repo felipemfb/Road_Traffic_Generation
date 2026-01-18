@@ -21,10 +21,10 @@ The available tools for research on New York included:
   Contains data such as the average speed per hour in 2013, with over 103 million documented observations 
 
 - **nodes dataset**  
-  - Contains data on street intersections
+  Contains data on street intersections
 
 - **links dataset**  
-  - Contains data about _links_, which are parts of a street that connects nodes
+  Contains data about _links_, which are parts of a street that connects nodes
 
 ---
 
