@@ -115,7 +115,7 @@ The following metrics were obtained after training:
 
 - Maximum speed: 104.74 km/h
 
-These results show that the model performs particularly well around central tendency measures (mean and median), which are the most relevant for urban traffic analysis.
+These results indicate that the model provides reasonably accurate predictions for urban traffic speeds, with mean and median predicted speeds close to typical urban values, making it useful for practical traffic analysis.
 
 ## 🗺️ Testing on Marseille
 The trained model was then applied to Marseille, which required reconstructing the New York feature space using data extracted from Marseille OpenStreetMap (OSM).
