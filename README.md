@@ -75,11 +75,7 @@ Using techniques such as **feature selection, data cleaning, data encoding, and 
 
 ## 🤖 Machine Learning Model
 
-A **Random Forest Regressor** was trained using **80% of the dataset**.
-
-### 🔧 Model Optimization
-- Grid Search
-- Cross-validation
+Using methods such as **grid search** and ** cross-validation**, a **Random Forest Regressor** was trained using **80% of the dataset**.
 
 ### ✅ Best Hyperparameters Found
 
@@ -93,18 +89,13 @@ bootstrap = False
 The following metrics were obtained after training:
 
 Mean Absolute Error (MAE): 7.61 km/h
-
 Root Mean Squared Error (RMSE): 12.74 km/h
-
 Coefficient of Determination (R²): 0.472
 
 ### 🚗 Speed Statistics
 Average speed: 32.82 km/h
-
 Median speed: 30.96 km/h
-
 Minimum speed: 4.99 km/h
-
 Maximum speed: 104.74 km/h
 
 These results show that the model performs particularly well around central tendency measures (mean and median), which are the most relevant for urban traffic analysis.
@@ -127,7 +118,7 @@ Through feature engineering, the following attributes were recreated:
 
 With these parameters, the model successfully generated speed predictions for Marseille streets, and the results were saved for visualization.
 
-### 🗺️ Interactive Visualization
+## 🗺️ Interactive Visualization
 A Python-based solution was developed to generate an interactive HTML map displaying:
 - Street names
 - Predicted traffic speed per street segment
@@ -135,7 +126,7 @@ A Python-based solution was developed to generate an interactive HTML map displa
 
 To improve visual clarity, the lowest and highest 5% quantiles were removed. This prevents extreme values from distorting the color scale and ensures better differentiation among intermediate speeds
 
-### 🧰 Libraries Used
+## 🧰 Libraries Used
 `osmnx` – Geospatial data extraction (New York & Marseille)
 `pandas` – Data import and processing
 `numpy` – Mathematical operations
@@ -145,7 +136,7 @@ To improve visual clarity, the lowest and highest 5% quantiles were removed. Thi
 `folium` – Interactive HTML map generation
 `branca` – Color scale and legend creation
 
-### 🚀 Future Improvements
+## 🚀 Future Improvements
 Potential next steps for this project include:
 
 - Development of a backend integrated with a modern frontend using React, Next.js, Node.js...
@@ -154,7 +145,7 @@ Potential next steps for this project include:
 - Exploration of new feature engineering strategies
 - Testing the model with data from other years
 
-### 🔗 Final Notes
+## 🔗 Final Notes
 This project highlights how machine learning combined with geospatial data can be used to model and transfer urban traffic behavior across different cities.
 
 📌 I invite you to explore the full repository and dive deeper into the implementation.
