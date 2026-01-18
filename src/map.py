@@ -35,7 +35,7 @@ vmin = edges["predicted_speed"].quantile(0.05)
 vmax = edges["predicted_speed"].quantile(0.95)
 
 colormap = cm.LinearColormap(
-    colors=["#00c853", "#ffd600", "#d50000"],
+    colors=["#d50000", "#ffd600", "#00c853"],
     vmin=vmin,
     vmax=vmax,
     text_color = 'white'
