@@ -150,8 +150,8 @@ A Python-based solution was developed to generate an interactive HTML map displa
 - A color legend for speed differentiation
 
 <div align="center">
-  <img width="450" height="226" alt="image" src="https://github.com/user-attachments/assets/77172a64-78fb-47aa-8dc6-90961169f3ad" />
-  <img width="450" height="225" alt="image" src="https://github.com/user-attachments/assets/04771cc2-796b-485a-a15d-aecbc9f935d4" />
+  <img width="300" height="226" alt="image" src="https://github.com/user-attachments/assets/77172a64-78fb-47aa-8dc6-90961169f3ad" />
+  <img width="300" height="225" alt="image" src="https://github.com/user-attachments/assets/04771cc2-796b-485a-a15d-aecbc9f935d4" />
 </div>
 
 To improve visual clarity, the lowest and highest 5% quantiles were removed. This prevents extreme values from distorting the color scale and ensures better differentiation among intermediate speeds
